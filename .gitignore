@@ -1,0 +1,22 @@
+# Eclipse specific
+.project
+.classpath
+.settings/
+
+# Compiled bytecode
+bin/
+
+# Logs
+*.log
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# IDEs (optional)
+.vscode/
+.idea/
+
+# Maven/Gradle (optional)
+target/
+build/
