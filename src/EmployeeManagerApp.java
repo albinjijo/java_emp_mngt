@@ -1,17 +1,14 @@
-import java.sql.Connection;
-import java.sql.SQLException;
-
 public class EmployeeManagerApp {
     public static void main(String[] args) {
+    	
+    	String filename = "C:\\Users\\ALBIN JIJO\\eclipse-workspace\\EmployeeManager\\src\\Employee.csv";
         
         try {
-            Connection conn = EmployeeManagerController.GetConnect();
-
-            EmployeeManagerController.writeDB();
-            conn.close();
-
-        } catch (SQLException e) {
-            System.err.println("Begin SQL Error: " + e.getMessage());
+            Response status = EmployeeManagerController.writeToDB(filename);
+            System.out.println(status.getStatuscode());
+            System.out.println(status.getErrormsg());
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
         }
     }
 }
