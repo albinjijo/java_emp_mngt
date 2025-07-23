@@ -1,3 +1,4 @@
+package com.litmus;
 
 public class Response {
 	private int statuscode;
