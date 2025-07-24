@@ -1,6 +1,9 @@
-package com.litmus;
+
+package com.litmus7.employeemanager.utils;
 
 import java.util.regex.Pattern;
+
+import com.litmus7.employeemanager.dto.Employee;
 
 public class Validator {
 	
@@ -35,6 +38,14 @@ public class Validator {
 
     public static boolean isValidSalary(int salary) {
         return salary >= 0;
+    }
+    
+    public static boolean validateEmployee(Employee emp) {
+        return emp.getEmployeeId() > 0
+            && isValidName(emp.getFirstName())
+            && isValidName(emp.getLastName())
+            && isValidEmail(emp.getEmail())
+            && isValidPhone(emp.getPhone());
     }
 
 }
