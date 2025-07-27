@@ -4,12 +4,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import com.litmus7.employeemanager.property.DatabaseProperties;
+
 public class DBConfig {
 	
 	public static Connection getDBConnection() {
-        String URL = "jdbc:mysql://localhost:3306/employee_management";
-        String USERNAME = "root";
-        String PASSWORD = "#12345678#";
+        String URL = DatabaseProperties.getDbUrl();
+        String USERNAME = DatabaseProperties.getDbUser();
+//        String USERNAME = "root";
+        String PASSWORD = DatabaseProperties.getDbPassword();
         Connection conn = null;
 
         try{

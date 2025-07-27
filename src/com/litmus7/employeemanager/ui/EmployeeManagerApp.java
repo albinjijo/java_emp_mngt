@@ -12,14 +12,22 @@ public class EmployeeManagerApp {
     	String filename = "C:\\Users\\ALBIN JIJO\\eclipse-workspace\\EmployeeManager\\src\\com\\litmus7\\employeemanager\\resources\\Employee.csv";
         EmployeeManagerController employeecontroller = new EmployeeManagerController();
         
-        Response status = employeecontroller.writeToDB(filename);
-        System.out.println(status.getStatuscode());
-        System.out.println(status.getErrormsg());
+        Response response = employeecontroller.writeToDB(filename);
+        if (response.getStatuscode() == 200) {
+            System.out.println("All records were inserted.");
+        }  else {
+            System.out.println("Message: " + response.getErrormsg());
+        }
     
         
         Response<List<Employee>> employeeListResponse=employeecontroller.getAllEmployees();
-        for (Employee emp: employeeListResponse.getData()) {
-        	System.out.println(emp.getFirstName());
+        if(employeeListResponse.getStatuscode()!=200) {
+        	System.out.println("Message: " + employeeListResponse.getErrormsg());
+        }else {
+        List<Employee> employees = employeeListResponse.getData();
+            for (Employee emp : employees) {
+                System.out.println(emp);
+            }
         }
-    }
+    } 
 }

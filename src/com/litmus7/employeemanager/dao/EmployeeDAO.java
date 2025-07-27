@@ -10,12 +10,13 @@ import java.util.List;
 import com.litmus7.employeemanager.controller.EmployeeManagerController;
 import com.litmus7.employeemanager.dto.Employee;
 import com.litmus7.employeemanager.utils.DBConfig;
+import com.litmus7.employeemanager.constants.SQLConstants;
+
 
 public class EmployeeDAO {
 	public boolean storeInDB(Employee employee) {
 		try (Connection conn = DBConfig.getDBConnection();) {
-			String sql = "INSERT INTO employee (emp_id, first_name, last_name, email, phone, department, salary, join_date) VALUES(?, ?, ?, ?, ?, ?, ?, ?);";
-			PreparedStatement stmt = conn.prepareStatement(sql);
+			PreparedStatement stmt = conn.prepareStatement(SQLConstants.INSERT_EMPLOYEE);
 			stmt.setInt(1, employee.getEmployeeId());
 			stmt.setString(2, employee.getFirstName());
 			stmt.setString(3, employee.getLastName());
@@ -40,7 +41,7 @@ public class EmployeeDAO {
 		List<Employee> employeeList = new ArrayList<>();
 
 		try (Connection conn = DBConfig.getDBConnection();
-				PreparedStatement stmt = conn.prepareStatement("select * from employee");
+				PreparedStatement stmt = conn.prepareStatement(SQLConstants.SELECT_ALL_EMPLOYEES);
 				ResultSet result = stmt.executeQuery();) {
 			while (result.next()) {
 				Employee emp = new Employee();
