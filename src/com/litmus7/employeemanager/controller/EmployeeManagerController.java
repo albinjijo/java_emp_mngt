@@ -5,6 +5,7 @@ package com.litmus7.employeemanager.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.litmus7.employeemanager.constants.ApplicationStatusCodes;
 import com.litmus7.employeemanager.dto.Employee;
 import com.litmus7.employeemanager.dto.Response;
 import com.litmus7.employeemanager.service.EmployeeService;
@@ -22,7 +23,7 @@ public class EmployeeManagerController {
 		}
 
         
-        int statuscode=200;
+        int statuscode=ApplicationStatusCodes.SUCCESS;
         String errormsg = null;
         
         
@@ -45,9 +46,9 @@ public class EmployeeManagerController {
 		List<Employee> employeeList=new ArrayList<>();
 		employeeList=EmployeeService.readAllFromDb();
 		if (employeeList == null) {
-	        return new Response<>(500, "Failed to fetch data", null);
+	        return new Response<>(ApplicationStatusCodes.FAILURE, "Failed to fetch data", null);
 	    }
-		Response<List<Employee>> obj = new Response<>(200,"data Fetched Succesfully",employeeList);
+		Response<List<Employee>> obj = new Response<>(ApplicationStatusCodes.SUCCESS,"data Fetched Succesfully",employeeList);
 		return obj;
 	}
 
