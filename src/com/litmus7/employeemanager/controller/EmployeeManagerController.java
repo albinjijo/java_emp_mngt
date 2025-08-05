@@ -2,12 +2,14 @@
 package com.litmus7.employeemanager.controller;
 
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.litmus7.employeemanager.constants.ApplicationStatusCodes;
 import com.litmus7.employeemanager.dto.Employee;
 import com.litmus7.employeemanager.dto.Response;
+import com.litmus7.employeemanager.exception.EmployeeServiceException;
 import com.litmus7.employeemanager.service.EmployeeService;
 import com.litmus7.employeemanager.utils.CSVOperations;
 import com.litmus7.employeemanager.utils.Validator;
@@ -17,7 +19,7 @@ import com.litmus7.employeemanager.utils.Validator;
 public class EmployeeManagerController {
 	static EmployeeService service= new EmployeeService();
 
-	public static Response writeToDB(String filename){
+	public static Response writeToDB(String filename) {
 		if (!Validator.isValidCSVFileName(filename)) {
 			return new Response(400, "invalid filename",null);
 		}
@@ -26,11 +28,16 @@ public class EmployeeManagerController {
         int statuscode=ApplicationStatusCodes.SUCCESS;
         String errormsg = null;
         
-        
+        boolean isWritten =true;
 
         List<String[]> data = CSVOperations.readFromCSV(filename);
+        try {
 
-        boolean isWritten=service.writeDataToDB(data);
+        isWritten=service.writeDataToDB(data);
+        }catch(EmployeeServiceException e) {
+        	return new Response(400, e.getMessage(),null);
+        	
+        }
 
         if(!isWritten) {
         	statuscode=400;
@@ -44,7 +51,12 @@ public class EmployeeManagerController {
 	public static Response<List<Employee>> getAllEmployees() {
 		// TODO Auto-generated method stub
 		List<Employee> employeeList=new ArrayList<>();
-		employeeList=EmployeeService.readAllFromDb();
+		try {
+			employeeList=EmployeeService.readAllFromDb();
+		} catch (EmployeeServiceException e) {
+			// TODO Auto-generated catch block
+			return new Response(400, e.getMessage(),null);
+		}
 		if (employeeList == null) {
 	        return new Response<>(ApplicationStatusCodes.FAILURE, "Failed to fetch data", null);
 	    }

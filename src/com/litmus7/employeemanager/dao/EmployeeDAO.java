@@ -9,12 +9,13 @@ import java.util.List;
 
 import com.litmus7.employeemanager.controller.EmployeeManagerController;
 import com.litmus7.employeemanager.dto.Employee;
+import com.litmus7.employeemanager.exception.EmployeeDaoException;
 import com.litmus7.employeemanager.utils.DBConfig;
 import com.litmus7.employeemanager.constants.SQLConstants;
 
 
 public class EmployeeDAO {
-	public boolean storeInDB(Employee employee) {
+	public boolean storeInDB(Employee employee) throws EmployeeDaoException{
 		try (Connection conn = DBConfig.getDBConnection();) {
 			PreparedStatement stmt = conn.prepareStatement(SQLConstants.INSERT_EMPLOYEE);
 			stmt.setInt(1, employee.getEmployeeId());
@@ -31,12 +32,13 @@ public class EmployeeDAO {
 			stmt.executeUpdate();
 			return true;
 		} catch (Exception e) {
-			return false;
+			throw new EmployeeDaoException("Error inserting employee to DB", e);
+			
 
 		}
 	}
 
-	public static List<Employee> selectAllEmployees() {
+	public static List<Employee> selectAllEmployees() throws EmployeeDaoException {
 		// TODO Auto-generated method stub
 		List<Employee> employeeList = new ArrayList<>();
 
@@ -57,7 +59,7 @@ public class EmployeeDAO {
 			}
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new EmployeeDaoException("Error in retrieving employee details from DB", e);
 		}
 		return employeeList;
 
