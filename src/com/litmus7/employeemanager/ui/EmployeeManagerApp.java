@@ -1,6 +1,12 @@
 package com.litmus7.employeemanager.ui;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.sql.Date;
 import java.util.List;
+import java.util.Scanner;
 
 import com.litmus7.employeemanager.controller.EmployeeManagerController;
 import com.litmus7.employeemanager.dto.Employee;
@@ -9,6 +15,7 @@ import com.litmus7.employeemanager.dto.Response;
 public class EmployeeManagerApp {
     public static void main(String[] args) {
     	
+    	Scanner scanner = new Scanner(System.in);
     	String filename = "C:\\Users\\ALBIN JIJO\\eclipse-workspace\\EmployeeManager\\src\\com\\litmus7\\employeemanager\\resources\\Employee.csv";
         EmployeeManagerController employeecontroller = new EmployeeManagerController();
         
@@ -29,5 +36,143 @@ public class EmployeeManagerApp {
                 System.out.println(emp);
             }
         }
+        
+      //get employee by id
+        System.out.print("Enter Employee ID to fetch: ");
+        int employeeId = scanner.nextInt();
+        scanner.nextLine(); // consume newline
+        Response<Employee> employeeResponse = employeecontroller.getEmployeeById(employeeId);
+
+        if (employeeResponse.getStatuscode() == 200) {
+            System.out.println("Employee details: " + employeeResponse.getData());
+        } else {
+            System.out.println("Error: " + employeeResponse.getErrormsg());
+        }
+
+        // Update employee
+        System.out.print("Do you want to update any employee details? (yes/no): ");
+        String choice = scanner.nextLine();
+
+        if (choice.equalsIgnoreCase("yes")) {
+            System.out.print("Enter Employee ID to update: ");
+            int updateId = scanner.nextInt();
+            scanner.nextLine(); // consume newline
+
+            Response<Employee> existingEmpResponse = employeecontroller.getEmployeeById(updateId);
+
+            if (existingEmpResponse.getStatuscode() == 200) {
+                Employee empToUpdate = existingEmpResponse.getData();
+
+                System.out.print("Enter new First Name (" + empToUpdate.getFirstName() + "): ");
+                String firstName = scanner.nextLine();
+                if (!firstName.isBlank()) empToUpdate.setFirstName(firstName);
+
+                System.out.print("Enter new Last Name (" + empToUpdate.getLastName() + "): ");
+                String lastName = scanner.nextLine();
+                if (!lastName.isBlank()) empToUpdate.setLastName(lastName);
+
+                System.out.print("Enter new Email (" + empToUpdate.getEmail() + "): ");
+                String email = scanner.nextLine();
+                if (!email.isBlank()) empToUpdate.setEmail(email);
+
+                System.out.print("Enter new Phone (" + empToUpdate.getPhone() + "): ");
+                String phone = scanner.nextLine();
+                if (!phone.isBlank()) empToUpdate.setPhone(phone);
+
+                System.out.print("Enter new Department (" + empToUpdate.getDepartment() + "): ");
+                String dept = scanner.nextLine();
+                if (!dept.isBlank()) empToUpdate.setDepartment(dept);
+
+                System.out.print("Enter new Salary (" + empToUpdate.getSalary() + "): ");
+                String salaryStr = scanner.nextLine();
+                if (!salaryStr.isBlank()) empToUpdate.setSalary(Double.parseDouble(salaryStr));
+
+                System.out.print("Enter new Join Date (" + empToUpdate.getJoinDate() + ") [yyyy-mm-dd]: ");
+                String joinDate = scanner.nextLine();
+                if (!joinDate.isBlank()) {
+                	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    				try {
+						empToUpdate.setJoinDate(sdf.parse(joinDate));
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+                	
+                }
+                
+
+                Response<Boolean> updateResponse = employeecontroller.updateEmployee(empToUpdate);
+                if (updateResponse.getStatuscode() == 200 && updateResponse.getData()) {
+                    System.out.println("Employee updated successfully!");
+                } else {
+                    System.out.println("Update failed: " + updateResponse.getErrormsg());
+                }
+
+            } else {
+                System.out.println("Employee not found: " + existingEmpResponse.getErrormsg());
+            }
+        }
+        
+        //delete employee by id
+        System.out.print("Enter Employee ID to delete: ");
+        int employeeId1 = scanner.nextInt();
+        scanner.nextLine(); 
+
+        Response<Boolean> employeeDeleteResponse = employeecontroller.deleteEmployeeById(employeeId1);
+
+        if (employeeDeleteResponse.getStatuscode() == 200) {
+            System.out.println("Success: " + employeeDeleteResponse.getErrormsg());
+        } else {
+            System.out.println("Error: " + employeeDeleteResponse.getErrormsg());
+        }
+        
+        // Add new employee
+        System.out.print("Do you want to add a new employee? (yes/no): ");
+        String addChoice = scanner.nextLine();
+        if (addChoice.equalsIgnoreCase("yes")) {
+            try {
+                System.out.print("Enter Employee ID: ");
+                int id = Integer.parseInt(scanner.nextLine());
+
+                System.out.print("Enter First Name: ");
+                String firstName = scanner.nextLine();
+
+                System.out.print("Enter Last Name: ");
+                String lastName = scanner.nextLine();
+
+                System.out.print("Enter Email: ");
+                String email = scanner.nextLine();
+
+                System.out.print("Enter Phone: ");
+                String phone = scanner.nextLine();
+
+                System.out.print("Enter Department: ");
+                String department = scanner.nextLine();
+
+                System.out.print("Enter Salary: ");
+                double salary = Double.parseDouble(scanner.nextLine());
+
+                System.out.print("Enter Join Date (yyyy-mm-dd): ");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                
+                String date = scanner.nextLine();
+                
+                java.util.Date joinDate = sdf.parse(date);
+                
+                
+
+                Employee newEmp = new Employee(id, firstName, lastName, email, phone, department, salary, joinDate);
+                Response<Boolean> addResponse = employeecontroller.addEmployee(newEmp);
+
+                if (addResponse.getStatuscode() == 200 && addResponse.getData()) {
+                    System.out.println("Employee added successfully.");
+                } else {
+                    System.out.println("Failed to add employee: " + addResponse.getErrormsg());
+                }
+
+            } catch (Exception e) {
+                System.out.println("Error while adding employee: " + e.getMessage());
+            }
+
     } 
-}
+}}

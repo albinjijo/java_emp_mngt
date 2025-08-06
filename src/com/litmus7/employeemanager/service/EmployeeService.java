@@ -52,5 +52,44 @@ public class EmployeeService {
 		}
 		return employeeList;
 	}
+	
+	 public Employee getEmployeeById(int employeeId) throws EmployeeServiceException {
+	        try {
+	            return dao.getEmployeeById(employeeId);
+	        } catch (EmployeeDaoException e) {
+	            throw new EmployeeServiceException("Failed to fetch employee by ID: " + employeeId, e);
+	        }
+	    }
+	    
+	    public boolean updateEmployee(Employee employee) throws EmployeeServiceException {
+	        try {
+	            if (!Validator.validateEmployee(employee)) {
+	                return false;
+	            }
+	            return dao.updateEmployee(employee);
+	        } catch (EmployeeDaoException e) {
+	            throw new EmployeeServiceException("Failed to update employee", e);
+	        }
+	    }
+	    
+	    public boolean deleteEmployeeById(int employeeId) throws EmployeeServiceException {
+	        try {
+	            return dao.deleteEmployeeById(employeeId);
+	        } catch (EmployeeDaoException e) {
+	            throw new EmployeeServiceException("Failed to delete employee", e);
+	        }
+	    }
+
+	    public boolean addEmployee(Employee employee) throws EmployeeServiceException {
+	        try {
+	        	if (!Validator.validateEmployee(employee)) {
+	        	    return false;
+	        	}
+
+	            return dao.addEmployee(employee);
+	        } catch (EmployeeDaoException e) {
+	            throw new EmployeeServiceException("Service error: Failed to add employee", e);
+	        }
+	    }
 
 }

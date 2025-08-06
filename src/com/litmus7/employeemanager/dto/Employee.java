@@ -11,6 +11,24 @@ public class Employee {
 	private String department ;
 	private Double salary ;
 	private Date joinDate ;
+	
+	public Employee() {}
+	
+	public Employee(int employeeId, String firstName, String lastName, String email, String phone, String department, double salary, Date joinDate) {
+	    this.employeeId = employeeId;
+	    this.firstName = firstName;
+	    this.lastName = lastName;
+	    this.email = email;
+	    this.phone = phone;
+	    this.department = department;
+	    this.salary = salary;
+	    this.joinDate = joinDate;
+	}
+	
+	
+	
+	
+	
 	public int getEmployeeId() {
 		return employeeId;
 	}
