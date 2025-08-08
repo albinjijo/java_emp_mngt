@@ -1,5 +1,5 @@
 
-package com.litmus7.employeemanager.controller;
+package com.litmus7.employeemanager.controller
 
 
 import java.text.ParseException;
