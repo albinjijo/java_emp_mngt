@@ -5,15 +5,18 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.sql.Date;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+import com.litmus7.employeemanager.constants.ApplicationStatusCodes;
 import com.litmus7.employeemanager.controller.EmployeeManagerController;
 import com.litmus7.employeemanager.dto.Employee;
 import com.litmus7.employeemanager.dto.Response;
 
+
 public class EmployeeManagerApp {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
     	
     	Scanner scanner = new Scanner(System.in);
     	String filename = "C:\\Users\\ALBIN JIJO\\eclipse-workspace\\EmployeeManager\\src\\com\\litmus7\\employeemanager\\resources\\Employee.csv";
@@ -173,6 +176,34 @@ public class EmployeeManagerApp {
             } catch (Exception e) {
                 System.out.println("Error while adding employee: " + e.getMessage());
             }
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            
+            
+            List<Employee> employeeList = Arrays.asList(
+            	    new Employee(107, "Arjyou", "Rao", "arjyou.rao@example.com", "5876543211", "IT", 78000.0, sdf.parse("2025-11-23")),
+            	    new Employee(108, "Sara", "Iyer", "sara.iyer@example.com", "9876543212", "Finance", 71000.0, sdf.parse("2021-02-06"))
+            	);
+
+            	Response<Integer> batchResponse = employeecontroller.addEmployeesInBatch(employeeList);
+
+            	
+            	if (batchResponse.getStatuscode() == ApplicationStatusCodes.SUCCESS) {
+            	    System.out.println("All employees added successfully.");
+            	}  else {
+            	    System.out.println(batchResponse.getErrormsg());
+            	}
+            	List<Integer> empIdsToTransfer = Arrays.asList(102, 105); 
+            	String newDept = "HR";
+
+            	Response<Boolean> transferResponse = employeecontroller.transferEmployeesToDepartment(empIdsToTransfer, newDept);
+
+            	if (transferResponse.getStatuscode() == ApplicationStatusCodes.SUCCESS) {
+            	    System.out.println("Tranferring employees to new department is Successfully completed");
+            	} else {
+            	    System.out.println("Failed Tranferring employees to new department");
+            	}
+
+            	System.out.println("Message: " + transferResponse.getErrormsg());
 
     } 
 }}

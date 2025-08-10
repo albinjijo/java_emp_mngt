@@ -11,8 +11,14 @@ import com.litmus7.employeemanager.exception.EmployeeDaoException;
 import com.litmus7.employeemanager.exception.EmployeeServiceException;
 import com.litmus7.employeemanager.utils.Validator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class EmployeeService {
 	static EmployeeDAO dao = new EmployeeDAO();
+	
+	private static final Logger logger = LogManager.getLogger(EmployeeService.class);
+
 
 	public boolean writeDataToDB(List<String[]> data) throws EmployeeServiceException {
 		for (String[] row : data) {
@@ -89,6 +95,59 @@ public class EmployeeService {
 	            return dao.addEmployee(employee);
 	        } catch (EmployeeDaoException e) {
 	            throw new EmployeeServiceException("Service error: Failed to add employee", e);
+	        }
+	    }
+	    
+	    public int[] addEmployeesInBatch(List<Employee> employeeList) throws EmployeeServiceException {
+	        logger.trace("Entering addEmployeesInBatch()");
+	        List<Employee> validEmployees = new ArrayList<>();
+
+	        for (int i = 0; i < employeeList.size(); i++) {
+	            Employee employee = employeeList.get(i);
+
+	            if (!Validator.validateEmployee(employee)) {
+	                logger.warn("Batch Row {}: Validation failed for employee ID {}", (i + 1), employee.getEmployeeId());
+	                continue;
+	            }
+
+	            try {
+	                if (dao.getEmployeeById(employee.getEmployeeId()) != null || validEmployees.contains(employee)) {
+	                    logger.warn("Batch Row {}: Employee with ID {} already exists", (i + 1), employee.getEmployeeId());
+	                    continue;
+	                }
+	            } catch (EmployeeDaoException e) {
+	                logger.error("Batch Row {}: Failed to check existing employee in DB", (i + 1), e);
+	                throw new EmployeeServiceException("Error checking for existing employee ID: " + employee.getEmployeeId(), e);
+	            }
+
+	            validEmployees.add(employee);
+	        }
+
+	        try {
+	            int[] result = dao.addEmployeesInBatch(validEmployees);
+	            logger.trace("Exiting addEmployeesInBatch()");
+	            return result;
+	        } catch (EmployeeDaoException e) {
+	            logger.trace("Exiting addEmployeesInBatch() with exception");
+	            throw new EmployeeServiceException("Failed to add employees in batch" + e.getMessage(), e);
+	        }
+	    }
+
+	    public int transferEmployeesToDepartment(List<Integer> employeeIds, String newDepartment) throws EmployeeServiceException {
+	        logger.trace("Entering transferEmployeesToDepartment()");
+	        if (employeeIds == null || employeeIds.isEmpty()) {
+	            throw new EmployeeServiceException("Employee ID list is empty.");
+	        }
+	        if (newDepartment == null || newDepartment.isBlank()) {
+	            throw new EmployeeServiceException("New department name is invalid.");
+	        }
+	        try {
+	            int transferred = dao.transferEmployeesToDepartment(employeeIds, newDepartment);
+	            logger.trace("Exiting transferEmployeesToDepartment()");
+	            return transferred;
+	        } catch (EmployeeDaoException e) {
+	            logger.trace("Exiting transferEmployeesToDepartment() with exception");
+	            throw new EmployeeServiceException("Error During Department Transfers" + e.getMessage(), e);
 	        }
 	    }
 

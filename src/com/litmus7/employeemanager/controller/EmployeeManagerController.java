@@ -4,6 +4,7 @@ package com.litmus7.employeemanager.controller;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.litmus7.employeemanager.constants.ApplicationStatusCodes;
@@ -14,10 +15,13 @@ import com.litmus7.employeemanager.service.EmployeeService;
 import com.litmus7.employeemanager.utils.CSVOperations;
 import com.litmus7.employeemanager.utils.Validator;
 
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class EmployeeManagerController {
 	static EmployeeService service= new EmployeeService();
+	private static final Logger logger = LogManager.getLogger(EmployeeManagerController.class);
+
 
 	public static Response writeToDB(String filename) {
 		if (!Validator.isValidCSVFileName(filename)) {
@@ -131,5 +135,54 @@ public class EmployeeManagerController {
 	        return new Response<>(ApplicationStatusCodes.FAILURE, "service error", false);
 	    }
 	}
+	
+	public Response<Integer> addEmployeesInBatch(List<Employee> employeeList) {
+        logger.trace("Entering addEmployeesInBatch(batchSize={})", 
+                     employeeList != null ? employeeList.size() : "null");
+
+        if (employeeList == null || employeeList.isEmpty()) {
+            logger.warn("Empty or null employee list provided for batch addition");
+            return new Response<>(ApplicationStatusCodes.FAILURE, "empty employee list",null);
+        }
+
+        try {
+            int[] result = service.addEmployeesInBatch(employeeList);
+            int addedCount = Arrays.stream(result).sum();
+            logger.info("Batch addition result: {}/{} employees added", addedCount, employeeList.size());
+
+            if (addedCount == employeeList.size()) {
+                return new Response<>(ApplicationStatusCodes.SUCCESS,"batch insertion successful", addedCount);
+                }
+             else {
+                return new Response<>(ApplicationStatusCodes.FAILURE, "batch insertion failed", null);
+            }
+        } catch (EmployeeServiceException e) {
+            logger.error("Error during batch employee addition", e);
+            return new Response<>(ApplicationStatusCodes.FAILURE, "batch insertion failed: " + e.getMessage(),null);
+        } finally {
+            logger.trace("Exiting addEmployeesInBatch");
+        }
+    }
+
+    public Response<Boolean> transferEmployeesToDepartment(List<Integer> employeeIds, String newDepartment) {
+        logger.trace("Entering transferEmployeesToDepartment(ids={}, newDept={})", employeeIds, newDepartment);
+
+        if (employeeIds == null || employeeIds.isEmpty() || newDepartment == null || newDepartment.isBlank()) {
+            logger.warn("Invalid input for employee transfer: ids={}, newDept={}", employeeIds, newDepartment);
+            return new Response<>(ApplicationStatusCodes.FAILURE, "invalid transfer input", false);
+        }
+
+        try {
+            int updatedCount = service.transferEmployeesToDepartment(employeeIds, newDepartment);
+            logger.info("{} employees transferred to {} department", updatedCount, newDepartment);
+            return new Response<>(ApplicationStatusCodes.SUCCESS,
+                    updatedCount + " employees transferred to " + newDepartment + " department.", true);
+        } catch (EmployeeServiceException e) {
+            logger.error("Error transferring employees to department {}", newDepartment, e);
+            return new Response<>(ApplicationStatusCodes.FAILURE, "Transfer failed: " + e.getMessage(), false);
+        } finally {
+            logger.trace("Exiting transferEmployeesToDepartment");
+        }
+    }
 
 }

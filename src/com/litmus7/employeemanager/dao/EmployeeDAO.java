@@ -13,8 +13,14 @@ import com.litmus7.employeemanager.exception.EmployeeDaoException;
 import com.litmus7.employeemanager.utils.DBConfig;
 import com.litmus7.employeemanager.constants.SQLConstants;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class EmployeeDAO {
+	
+	private static final Logger logger = LogManager.getLogger(EmployeeDAO.class);
+
+	
 	public boolean storeInDB(Employee employee) throws EmployeeDaoException{
 		try (Connection conn = DBConfig.getDBConnection();) {
 			PreparedStatement stmt = conn.prepareStatement(SQLConstants.INSERT_EMPLOYEE);
@@ -146,6 +152,71 @@ public class EmployeeDAO {
 
         } catch (SQLException e) {
             throw new EmployeeDaoException("Error inserting employee with ID " + employee.getEmployeeId() + ": " + e.getMessage(), e);
+        }
+    }
+    
+    public int[] addEmployeesInBatch(List<Employee> employeeList) throws EmployeeDaoException {
+        logger.trace("Entering addEmployeesInBatch. Batch size: {}", employeeList.size());
+        try (Connection conn = DBConfig.getDBConnection();
+             PreparedStatement preparedStatement = conn.prepareStatement(SQLConstants.INSERT_EMPLOYEE)) {
+
+            for (Employee employee : employeeList) {
+                preparedStatement.setInt(1, employee.getEmployeeId());
+                preparedStatement.setString(2, employee.getFirstName());
+                preparedStatement.setString(3, employee.getLastName());
+                preparedStatement.setString(4, employee.getEmail());
+                preparedStatement.setString(5, employee.getPhone());
+                preparedStatement.setString(6, employee.getDepartment());
+                preparedStatement.setDouble(7, employee.getSalary());
+                java.sql.Date sqlDate = new java.sql.Date(employee.getJoinDate().getTime());
+    			preparedStatement.setDate(8, sqlDate);
+                preparedStatement.addBatch();
+            }
+
+            int[] result = preparedStatement.executeBatch();
+            logger.debug("addEmployeesInBatch executed. Batch result length: {}", result.length);
+
+            return result;
+        } catch (SQLException e) {
+            logger.error("Error inserting employees in batch", e);
+            throw new EmployeeDaoException("Error inserting employees :" + e.getMessage(), e);
+        } finally {
+            logger.trace("Exiting addEmployeesInBatch");
+        }
+    }
+
+    public int transferEmployeesToDepartment(List<Integer> employeeIds, String newDepartment) throws EmployeeDaoException {
+        logger.trace("Entering transferEmployeesToDepartment. New Department: {}, IDs: {}", newDepartment, employeeIds);
+        int updatedCount = 0;
+        try (Connection conn = DBConfig.getDBConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement pstmt = conn.prepareStatement(SQLConstants.UPDATE_DEPARTMENT)) {
+                for (Integer employeeId : employeeIds) {
+                    pstmt.setString(1, newDepartment);
+                    pstmt.setInt(2, employeeId);
+                    int rowsAffected = pstmt.executeUpdate();
+
+                    if (rowsAffected == 0) {
+                        logger.warn("No employee found for ID {}", employeeId);
+                        throw new SQLException("Employee ID " + employeeId + " not found");
+                    }
+                    updatedCount++;
+                }
+                conn.commit();
+                logger.debug("transferEmployeesToDepartment committed. Employees updated: {}", updatedCount);
+            } catch (SQLException e) {
+                conn.rollback();
+                logger.error("Transaction failed for transferEmployeesToDepartment. Rolled back.", e);
+                throw new EmployeeDaoException("Transaction failed. Rolled back. " + e.getMessage());
+            } finally {
+                conn.setAutoCommit(true);
+            }
+            return updatedCount;
+        } catch (SQLException e) {
+            logger.error("Database error in transferEmployeesToDepartment", e);
+            throw new EmployeeDaoException("DB Error: " + e.getMessage());
+        } finally {
+            logger.trace("Exiting transferEmployeesToDepartment");
         }
     }
 
