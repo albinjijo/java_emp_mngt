@@ -180,8 +180,8 @@ public class EmployeeManagerApp {
             
             
             List<Employee> employeeList = Arrays.asList(
-            	    new Employee(107, "Arjyou", "Rao", "arjyou.rao@example.com", "5876543211", "IT", 78000.0, sdf.parse("2025-11-23")),
-            	    new Employee(108, "Sara", "Iyer", "sara.iyer@example.com", "9876543212", "Finance", 71000.0, sdf.parse("2021-02-06"))
+            	    new Employee(111, "virat", "kohli", "virat@example.com", "111111111", "IT", 30000.0, sdf.parse("2025-11-23")),
+            	    new Employee(112, "rohit", "sharma", "rohit@example.com", "222222222", "Finance", 71000.0, sdf.parse("2021-02-06"))
             	);
 
             	Response<Integer> batchResponse = employeecontroller.addEmployeesInBatch(employeeList);
