@@ -22,6 +22,7 @@ public class EmployeeDAO {
 
 	
 	public boolean storeInDB(Employee employee) throws EmployeeDaoException{
+		logger.trace("Entering storeInDB.");
 		try (Connection conn = DBConfig.getDBConnection();) {
 			PreparedStatement stmt = conn.prepareStatement(SQLConstants.INSERT_EMPLOYEE);
 			stmt.setInt(1, employee.getEmployeeId());
@@ -38,13 +39,14 @@ public class EmployeeDAO {
 			stmt.executeUpdate();
 			return true;
 		} catch (Exception e) {
-			throw new EmployeeDaoException("Error inserting employee to DB", e);
+			throw new EmployeeDaoException("Error inserting employee to DB", e,100);
 			
 
 		}
 	}
 
 	public static List<Employee> selectAllEmployees() throws EmployeeDaoException {
+		logger.trace("Entering selectAllEmployees.");
 		// TODO Auto-generated method stub
 		List<Employee> employeeList = new ArrayList<>();
 
@@ -65,13 +67,14 @@ public class EmployeeDAO {
 			}
 
 		} catch (SQLException e) {
-			throw new EmployeeDaoException("Error in retrieving employee details from DB", e);
+			throw new EmployeeDaoException("Error in retrieving employee details from DB", e,100);
 		}
 		return employeeList;
 
 	}
 	
 	public Employee getEmployeeById(int employeeId) throws EmployeeDaoException {
+		logger.trace("Entering getEmployeeById.");
         try (Connection conn = DBConfig.getDBConnection();
              PreparedStatement stmt = conn.prepareStatement(SQLConstants.SELECT_EMPLOYEE_BY_ID)) {
 
@@ -92,12 +95,13 @@ public class EmployeeDAO {
                 return emp;
             }
         } catch (SQLException e) {
-        	throw new EmployeeDaoException("Error in retrieving employee details from DB", e);
+        	throw new EmployeeDaoException("Error in retrieving employee details from DB", e,100);
         }
         return null;
     }
 
     public boolean updateEmployee(Employee employee) throws EmployeeDaoException {
+    	logger.trace("Entering updateEmployee.");
         try (Connection conn = DBConfig.getDBConnection();
              PreparedStatement stmt = conn.prepareStatement(SQLConstants.UPDATE_EMPLOYEE)) {
 
@@ -114,11 +118,12 @@ public class EmployeeDAO {
             int rowsUpdated = stmt.executeUpdate();
             return rowsUpdated > 0;
         } catch (SQLException e) {
-            throw new EmployeeDaoException("Error updating employee", e);
+            throw new EmployeeDaoException("Error updating employee", e,100);
         }
     }
 
     public boolean deleteEmployeeById(int employeeId) throws EmployeeDaoException {
+    	logger.trace("Entering deleteEmployeeById.");
         try (Connection conn = DBConfig.getDBConnection();
              PreparedStatement stmt = conn.prepareStatement(SQLConstants.DELETE_EMPLOYEE_BY_ID)) {
 
@@ -127,13 +132,14 @@ public class EmployeeDAO {
             return rowsDeleted > 0;
   
         } catch (SQLException e) {
-            throw new EmployeeDaoException("Error deleting employee with ID " + employeeId + ": " + e.getMessage(), e);
+            throw new EmployeeDaoException("Error deleting employee with ID " + employeeId + ": " + e.getMessage(), e,100);
         }
 
      }
     
 
     public boolean addEmployee(Employee employee) throws EmployeeDaoException {
+    	logger.trace("Entering addEmployee.");
         try (Connection connection = DBConfig.getDBConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.INSERT_EMPLOYEE)) {
 
@@ -151,12 +157,12 @@ public class EmployeeDAO {
             return rowsInserted > 0;
 
         } catch (SQLException e) {
-            throw new EmployeeDaoException("Error inserting employee with ID " + employee.getEmployeeId() + ": " + e.getMessage(), e);
+            throw new EmployeeDaoException("Error inserting employee with ID " + employee.getEmployeeId() + ": " + e.getMessage(), e,100);
         }
     }
     
     public int[] addEmployeesInBatch(List<Employee> employeeList) throws EmployeeDaoException {
-        logger.trace("Entering addEmployeesInBatch. Batch size: {}", employeeList.size());
+        logger.trace("Entering addEmployeesInBatch.");
         try (Connection conn = DBConfig.getDBConnection();
              PreparedStatement preparedStatement = conn.prepareStatement(SQLConstants.INSERT_EMPLOYEE)) {
 
@@ -174,19 +180,19 @@ public class EmployeeDAO {
             }
 
             int[] result = preparedStatement.executeBatch();
-            logger.debug("addEmployeesInBatch executed. Batch result length: {}", result.length);
+            logger.debug("addEmployeesInBatch executed");
 
             return result;
         } catch (SQLException e) {
             logger.error("Error inserting employees in batch", e);
-            throw new EmployeeDaoException("Error inserting employees :" + e.getMessage(), e);
+            throw new EmployeeDaoException("Error inserting employees :" + e.getMessage(), e,100);
         } finally {
             logger.trace("Exiting addEmployeesInBatch");
         }
     }
 
     public int transferEmployeesToDepartment(List<Integer> employeeIds, String newDepartment) throws EmployeeDaoException {
-        logger.trace("Entering transferEmployeesToDepartment. New Department: {}, IDs: {}", newDepartment, employeeIds);
+        logger.trace("Entering transferEmployeesToDepartment.");
         int updatedCount = 0;
         try (Connection conn = DBConfig.getDBConnection()) {
             conn.setAutoCommit(false);
@@ -203,18 +209,18 @@ public class EmployeeDAO {
                     updatedCount++;
                 }
                 conn.commit();
-                logger.debug("transferEmployeesToDepartment committed. Employees updated: {}", updatedCount);
+                logger.debug("transferEmployeesToDepartment committed");
             } catch (SQLException e) {
                 conn.rollback();
-                logger.error("Transaction failed for transferEmployeesToDepartment. Rolled back.", e);
-                throw new EmployeeDaoException("Transaction failed. Rolled back. " + e.getMessage());
+                logger.error("Transaction failed for transferEmployeesToDepartment", e);
+                throw new EmployeeDaoException("Transaction failed. Rolled back. " + e.getMessage(),100);
             } finally {
                 conn.setAutoCommit(true);
             }
             return updatedCount;
         } catch (SQLException e) {
             logger.error("Database error in transferEmployeesToDepartment", e);
-            throw new EmployeeDaoException("DB Error: " + e.getMessage());
+            throw new EmployeeDaoException("DB Error: " + e.getMessage(),100);
         } finally {
             logger.trace("Exiting transferEmployeesToDepartment");
         }

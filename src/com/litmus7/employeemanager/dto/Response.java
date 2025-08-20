@@ -5,14 +5,16 @@ public class Response <T>{
 	private int statuscode;
     private String errormsg;
     private T data;
+    private int errorcode;
 
     // Constructors
    
 
-    public Response(int statuscode, String errormsg, T data) {
+    public Response(int statuscode, String errormsg, int errorcode, T data) {
         this.statuscode = statuscode;
         this.errormsg = errormsg;
         this.data = data;
+        this.errorcode = errorcode;
     }
     
     public int getStatuscode() {
@@ -26,6 +28,10 @@ public class Response <T>{
     
     public T getData() {
         return data;
+    }
+    
+    public int getErrorCode() {
+        return errorcode;
     }
 
 }

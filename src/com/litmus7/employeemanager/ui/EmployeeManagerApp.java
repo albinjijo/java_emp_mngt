@@ -13,6 +13,7 @@ import com.litmus7.employeemanager.constants.ApplicationStatusCodes;
 import com.litmus7.employeemanager.controller.EmployeeManagerController;
 import com.litmus7.employeemanager.dto.Employee;
 import com.litmus7.employeemanager.dto.Response;
+import com.litmus7.employeemanager.property.ErrorCodeProperties;
 
 
 public class EmployeeManagerApp {
@@ -26,7 +27,7 @@ public class EmployeeManagerApp {
         if (response.getStatuscode() == 200) {
             System.out.println("All records were inserted.");
         }  else {
-            System.out.println("Message: " + response.getErrormsg());
+            System.out.println("Message: " + response.getErrormsg()+ ErrorCodeProperties.getErrorCodeMeaning(Integer.toString(response.getErrorCode())));
         }
     
         
@@ -43,7 +44,7 @@ public class EmployeeManagerApp {
       //get employee by id
         System.out.print("Enter Employee ID to fetch: ");
         int employeeId = scanner.nextInt();
-        scanner.nextLine(); // consume newline
+        scanner.nextLine(); 
         Response<Employee> employeeResponse = employeecontroller.getEmployeeById(employeeId);
 
         if (employeeResponse.getStatuscode() == 200) {
